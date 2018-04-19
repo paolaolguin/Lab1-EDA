@@ -11,11 +11,11 @@ struct Cliente{
   char sur1[31];
   char sur2[31];
   char pet[21];
-  char species[21];//4
-  unsigned short int age;//5
-  char phone[21];//6
-  unsigned short int atentions;//7
-  char vaccines[3]; // si/no 8
+  char species[21];
+  unsigned short int age;
+  char phone[21];
+  unsigned short int atentions;
+  char vaccines[3];
   char date[11];
   char run[11];
   char id[11];
@@ -35,7 +35,7 @@ struct Cliente* crearArreglo(int* numeroRegistros){
   char line[MAXLINE];
   fgets(line, sizeof(line), file);
   *numeroRegistros = atoi(line);
-  clientesBultos = (struct Cliente*) malloc(sizeof(struct Cliente)*(*numeroRegistros));
+  clientesBultos = (struct Cliente*) calloc(*numeroRegistros, sizeof(struct Cliente*));
   int i = 0;
   while(fgets(line, sizeof(line), file)!= NULL){
     fprintf(stdout,"%s",line);
@@ -50,43 +50,50 @@ void freeArreglo(struct Cliente* clientes){
   free(clientes);
   clientes = NULL;
 }
-/*Funcion que agrega el rut del dueño a un registro*/
-struct Cliente* agregarRut(struct Cliente* clientes, char* rut, char* nombre, char* apellido, char* apellidoM, char* mascota, int size){
-  int i;
-  for (i = 0; i < size; i++){
-    if (strcmp(clientes[i].name, nombre) == 0){
-      if (strcmp(clientes[i].sur1, apellido) == 0){
-        if (strcmp(clientes[i].sur2, apellidoM) == 0){
-          if (strcmp(clientes[i].pet, mascota)== 0){
-            strcpy(clientes[i].run, rut);
-          }
-        }
-        else{
-          continue;
-        }
-      }
-      else{
-        continue;
-      }
-    }
-    else{
-      continue;
-    }
+/*Funcion que agrega el rut del dueño a un registro. Si se trata de un registro que no existe, el arreglo de clientes no se modifica.*/
+struct Cliente* agregarRut(struct Cliente* clientes, int index, char* rut){
+  if (index != -1){
+    strcpy(clientes[index].run, rut);
   }
   return clientes;
 }
-/*Funcion que agrega un id a la mascota en un registro*/
-//TODO encontrar una forma de arreglar el resto de los ids y ruts para que no se imprima basura al ponerlos en el archivo
-struct Cliente* agregarID(struct Cliente* clientes, char* id, char* nombre, char* apellido, char* apellidoM, char* mascota, int size){
-  int i;
+/*Funcion que agrega un id a la mascota en un registro. Si se trata de un registro que no existe, el arreglo de clientes no se modifica.*/
+struct Cliente* agregarID(struct Cliente* clientes, int index, char* id){
+  if (index != -1){
+    strcpy(clientes[index].id, id);
+  }
+  return clientes;
+}
+/*Funcion que crea el archivo de salida imprimiendo todo lo que tiene el arreglo de clientes.*/
+void crearArchivo(struct Cliente* clientesBultos, int size){
+  FILE* file;
+  file = fopen("Bultos.out", "w");
+  if (file == NULL){
+    stat = NULLPOINTER;
+    printf("%s\n", "Ha habido un error, no se pudo crear el archivo de salida. El programa terminara.");
+    exit(0);
+  }
+  else{
+    int i;
+    for (i = 0; i < size; i++){
+      fprintf(file, "%s %s %s %s %s %hu %s %hu %s %s %s %s \n", clientesBultos[i].name , clientesBultos[i].sur1, clientesBultos[i].sur2, clientesBultos[i].pet, clientesBultos[i].species, clientesBultos[i].age, clientesBultos[i].phone, clientesBultos[i].atentions, clientesBultos[i].vaccines, clientesBultos[i].date, clientesBultos[i].run, clientesBultos[i].id);
+
+    }
+    fclose(file);
+  }
+}
+/*Funcion que busca al cliente dado su nombre, apellidos y nombre de su mascota. Retorna el indice del cliente si lo encuentra, y -1 si no. Para esta funcion se asume que pueden haber clientes que tengan el mismo nombre, pero no que sus mascotas se llamen igual.*/
+int getCliente(struct Cliente* clientes, int size, char* nombre, char* apellido, char* apellidoM, char* mascota, char* especie){
+  int i, j;
   for (i = 0; i < size; i++){
     if ( strcmp(clientes[i].name, nombre) == 0){
       if (strcmp(clientes[i].sur1, apellido) == 0){
         if (strcmp(clientes[i].sur2, apellidoM) == 0){
           if (strcmp(clientes[i].pet, mascota) == 0){
-            strcpy(clientes[i].id, id);
+            return j = i;
           }
           else{
+            j = -1;
             continue;
           }
         }
@@ -98,44 +105,19 @@ struct Cliente* agregarID(struct Cliente* clientes, char* id, char* nombre, char
         continue;
       }
     }
-    else{
-      continue;
-    }
+    continue;
   }
-  return clientes;
+  return j;
 }
-//TODO eliminar, agregarRegistro, modificarRegistro, crearArchivo
-/*void crearArchivo(struct Cliente* clientes, int size){
-//TODO hacer esto una vez que arrgle lo de arriba
-  FILE* file;
-  file = fopen("Bultos.out", "w");
-  if (file == NULL){
-    stat = NULLPOINTER;
-    printf("%s\n", "Ha habido un error, no se pudo crear el archivo de salida. El programa terminara.");
-    exit(0);
-  }
-  else{
-    int i;
-    for (i = 0; i < size; i++){
-      fprintf(file, "%s \n", );
 
-    }
-
-  }
-}
-*/
+//TODO eliminar, agregarRegistro, modificarRegistro
 
 void menu(){
   struct Cliente* clientes;
   int size;
   clientes = crearArreglo(&size);
-  //esto es una prueba
-  clientes = agregarID(clientes, "11.111.111-2" ,"Susana", "Torio", "Grande", "Albondiga", size);
-  printf("%s\n", clientes[0].id);
-  //aca termina la prueba
+  crearArchivo(clientes, size);
   freeArreglo(clientes);
-
-
 }
 
 int main(int argc, char const *argv[]) {
