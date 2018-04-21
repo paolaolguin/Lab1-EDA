@@ -35,7 +35,7 @@ struct Cliente* crearArreglo(int* numeroRegistros){
   char line[MAXLINE];
   fgets(line, sizeof(line), file);
   *numeroRegistros = atoi(line);
-  clientesBultos = (struct Cliente*) calloc(*numeroRegistros, sizeof(struct Cliente*));
+  clientesBultos = (struct Cliente*) calloc(*numeroRegistros, sizeof(struct Cliente));
   int i = 0;
   while(fgets(line, sizeof(line), file)!= NULL){
     fprintf(stdout,"%s",line);
@@ -50,14 +50,14 @@ void freeArreglo(struct Cliente* clientes){
   free(clientes);
   clientes = NULL;
 }
-/*Funcion que agrega el rut del dueño a un registro. Si se trata de un registro que no existe, el arreglo de clientes no se modifica.*/
+/*Funcion que agrega el rut del dueño de un unico registro. Si se trata de un registro que no existe, el arreglo de clientes no se modifica.*/
 struct Cliente* agregarRut(struct Cliente* clientes, int index, char* rut){
   if (index != -1){
     strcpy(clientes[index].run, rut);
   }
   return clientes;
 }
-/*Funcion que agrega un id a la mascota en un registro. Si se trata de un registro que no existe, el arreglo de clientes no se modifica.*/
+/*Funcion que agrega un id a la mascota de un unico registro. Si se trata de un registro que no existe, el arreglo de clientes no se modifica.*/
 struct Cliente* agregarID(struct Cliente* clientes, int index, char* id){
   if (index != -1){
     strcpy(clientes[index].id, id);
@@ -109,14 +109,40 @@ int getCliente(struct Cliente* clientes, int size, char* nombre, char* apellido,
   }
   return j;
 }
+/*Funcion que hace un arreglo con los Clientes que se quieren eliminar de los registros*/
+struct Cliente* clientesAeliminar(int* size){
+  int i;
+  char line[MAXLINE];
+  struct Cliente* clientesAborrar;
+  clientesAborrar = (struct Cliente*)calloc(*size, sizeof(struct Cliente));
+  for (i = 0; i < *size; i++){
+    printf("%s\n", "Ingrese el cliente de la forma que esta en el archivo.");
+    fgets(line, sizeof(line),stdin);
+    sscanf(line, "%s %s %s %s %s %hu %s %hu %s %s", clientesAborrar[i].name , clientesAborrar[i].sur1, clientesAborrar[i].sur2, clientesAborrar[i].pet, clientesAborrar[i].species, &clientesAborrar[i].age, clientesAborrar[i].phone, &clientesAborrar[i].atentions, clientesAborrar[i].vaccines, clientesAborrar[i].date);
+  }
+  //pruebas
+  for (i = 0; i < *size; i++){
+    printf("%s %s %s %s %s %hu %s %hu %s %s", clientesAborrar[i].name , clientesAborrar[i].sur1, clientesAborrar[i].sur2, clientesAborrar[i].pet, clientesAborrar[i].species, clientesAborrar[i].age, clientesAborrar[i].phone, clientesAborrar[i].atentions, clientesAborrar[i].vaccines, clientesAborrar[i].date);
+  }
+  return clientesAborrar;
+}
+
+struct Cliente* eliminarClientes(){
+
+}
 
 //TODO eliminar, agregarRegistro, modificarRegistro
 
 void menu(){
   struct Cliente* clientes;
+  struct Cliente* clientes2;
   int size;
+  int eliminar;
+  int agregar;
   clientes = crearArreglo(&size);
   crearArchivo(clientes, size);
+  clientes2 = clientesAeliminar(&eliminar);
+  freeArreglo(clientes2);
   freeArreglo(clientes);
 }
 
