@@ -180,22 +180,53 @@ struct Cliente* eliminarClientes(struct Cliente* clientes, struct Cliente* clien
     return clientesNuevo;
   }
 }
+/*Funcion que agrega una cantidad de clientes, creando un arreglo nuevo donde copia los valores antiguos y pone tambien los nuevos*/
+struct Cliente* agregarClientes(struct Cliente* clientes, int size, int* agregar, int* sizeN){
+  char line[MAXLINE];
+  printf("%s\n", "Ingrese el numero de clientes que desea agregar.");
+  fgets(line, sizeof(line), stdin);
+  *agregar = atoi(line);
+  int i;
+  *sizeN = *agregar + size;
+  struct Cliente* nuevos;
+  nuevos = (struct Cliente*)calloc(*sizeN, sizeof(struct Cliente));
+  for (i = 0; i < *agregar; i++){
+    printf("%s\n", "Ingrese el cliente de la forma que esta en el archivo.");
+    fgets(line, sizeof(line),stdin);
+    sscanf(line, "%s %s %s %s %s %hu %s %hu %s %s", nuevos[i].name , nuevos[i].sur1, nuevos[i].sur2, nuevos[i].pet, nuevos[i].species, &nuevos[i].age, nuevos[i].phone, &nuevos[i].atentions, nuevos[i].vaccines, nuevos[i].date);
+  }
+  for (i = 0; i < size; i++){
+    strcpy(nuevos[i+*agregar].name, clientes[i].name);
+    strcpy(nuevos[i+*agregar].sur1, clientes[i].sur1);
+    strcpy(nuevos[i+*agregar].sur2, clientes[i].sur2);
+    strcpy(nuevos[i+*agregar].pet, clientes[i].pet);
+    strcpy(nuevos[i+*agregar].species, clientes[i].species);
+    nuevos[i+*agregar].age = clientes[i].age;
+    strcpy(nuevos[i+*agregar].phone, clientes[i].phone);
+    nuevos[i+*agregar].atentions = clientes[i].atentions;
+    strcpy(nuevos[i+*agregar].vaccines, clientes[i].vaccines);
+    strcpy(nuevos[i+*agregar].date, clientes[i].date);
+  }
+  freeArreglo(clientes);
+  return nuevos;
+}
 
-//TODO agregarRegistro, modificarRegistro
+
+//TODO modificarRegistro
 
 void menu(){
   struct Cliente* clientes;
   struct Cliente* clientes2;
-  struct Cliente* clientesNuevo;
+  //struct Cliente* clientesNuevo;
   int size;
-  int eliminar;
+  //int eliminar;
   int sizeN;
-  //  int agregar;
+  int agregar;
   clientes = crearArreglo(&size);
-  clientes2 = clientesAeliminar(&eliminar);
-  clientesNuevo = eliminarClientes(clientes, clientes2, size, eliminar, &sizeN);
-  crearArchivo(clientesNuevo, sizeN);
-  freeArreglo(clientesNuevo);
+  clientes2 = agregarClientes(clientes, size, &agregar, &sizeN);
+  //clientesNuevo = eliminarClientes(clientes, clientes2, size, eliminar, &sizeN);
+  crearArchivo(clientes2, sizeN);
+  freeArreglo(clientes2);
 }
 
 int main(int argc, char const *argv[]) {
