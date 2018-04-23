@@ -38,7 +38,6 @@ struct Cliente* crearArreglo(int* numeroRegistros){
   clientesBultos = (struct Cliente*) calloc(*numeroRegistros, sizeof(struct Cliente));
   int i = 0;
   while(fgets(line, sizeof(line), file)!= NULL){
-    fprintf(stdout,"%s",line);
     sscanf(line, "%s %s %s %s %s %hu %s %hu %s %s", clientesBultos[i].name , clientesBultos[i].sur1, clientesBultos[i].sur2, clientesBultos[i].pet, clientesBultos[i].species, &clientesBultos[i].age, clientesBultos[i].phone, &clientesBultos[i].atentions, clientesBultos[i].vaccines, clientesBultos[i].date);
     i++;
   }
@@ -83,7 +82,7 @@ void crearArchivo(struct Cliente* clientesBultos, int size){
   }
 }
 /*Funcion que busca al cliente dado su nombre, apellidos y nombre de su mascota. Retorna el indice del cliente si lo encuentra, y -1 si no. Para esta funcion se asume que pueden haber clientes que tengan el mismo nombre y apellidos, pero en ese caso sus mascotas no se pueden llamar igual.*/
-int getCliente(struct Cliente* clientes, int size, char* nombre, char* apellido, char* apellidoM, char* mascota, char* especie){
+int getCliente(struct Cliente* clientes, int size, char* nombre, char* apellido, char* apellidoM, char* mascota){
   int i, j;
   for (i = 0; i < size; i++){
     if ( strcmp(clientes[i].name, nombre) == 0){
@@ -211,22 +210,154 @@ struct Cliente* agregarClientes(struct Cliente* clientes, int size, int* agregar
   return nuevos;
 }
 
+void modificar(struct Cliente* clientes, int index){
+  char line[MAXLINE];
+  unsigned short int numero;
+  char nombre[21];
+  char apellido[31];
+  char opcion[3];
+  char fecha[11];
+  printf("%s\n", "Que le gustaria cambiar de este Cliente? 0, nombre, 1, apellido paterno, 2 apellido materno, 3 nombre de la mascota, 4 especie de la mascota, 5 edad de la mascota, 6 vacunas, 7 telefono, 8 proxima fecha de atencion.");
+  fgets(line, sizeof(MAXLINE), stdin);
+  numero = atoi(line);
+  switch (numero){
+    case 0:
+      printf("%s\n", "Ingrese el nombre corregido, recuerde que tiene un largo maximo de 20.");
+      fgets(nombre, sizeof(nombre), stdin);
+      strcpy(clientes[index].name, nombre);
+      break;
+    case 1:
+      printf("%s\n", "Ingrese el apellido paterno corregido, recuerde que tiene un largo maximo de 30.");
+      fgets(apellido, sizeof(apellido), stdin);
+      strcpy(clientes[index].sur1, apellido);
+      break;
+    case 2:
+      printf("%s\n", "Ingrese el apellido materno corregido, recuerde que tiene un largo maximo de 30.");
+      fgets(apellido, sizeof(apellido), stdin);
+      strcpy(clientes[index].sur2, apellido);
+      break;
+    case 3:
+      printf("%s\n", "Ingrese el nombre de la mascota corregido, recuerde que tiene un largo maximo de 20.");
+      fgets(nombre, sizeof(nombre), stdin);
+      strcpy(clientes[index].pet, nombre);
+      break;
+    case 4:
+      printf("%s\n", "Ingrese la especie de la mascota corregida, recuerde que tiene un largo maximo de 20.");
+      fgets(nombre, sizeof(nombre), stdin);
+      strcpy(clientes[index].species, nombre);
+      break;
+    case 5:
+      printf("%s\n", "Ingrese la edad de la mascota corregida.");
+      fgets(line, sizeof(line), stdin);
+      clientes[index].age = atoi(line);
+      break;
+    case 6:
+      printf("%s\n", "Ingrese la correcion sobre si la mascota tiene sus vacunas al dia o no. Recuerde que el largo maximo de esto es 2 (si o no)");
+      fgets(opcion, sizeof(opcion), stdin);
+      strcpy(clientes[index].vaccines, opcion);
+      break;
+    case 7:
+      printf("%s\n", "Ingrese el telefono de contacto del cliente corregido. Recuerde que tiene un largo maximo de 20.");
+      fgets(nombre, sizeof(nombre), stdin);
+      strcpy(clientes[index].phone, nombre);
+      break;
+    case 8:
+      printf("%s\n", "Ingrese la proxima fecha de atencion corregida. Recuerde que esta en el formato DD/MM/YYYY y que, por lo mismo, su largo maximo es de 10.");
+      fgets(fecha, sizeof(fecha), stdin);
+      strcpy(clientes[index].date, fecha);
+      break;
+    default:
+      printf("%s\n", "Opcion no valida, el programa terminara.");
+      exit(0);
+  }
+}
 
-//TODO modificarRegistro
-
+struct Cliente* aModificar(struct Cliente* clientes, int size){
+  char line[MAXLINE];
+  int cantidad;
+  char nombre[21];
+  char mascota[21];
+  char ap1[31];
+  char ap2[31];
+  int i;
+  printf("%s\n", "Ingrese la cantidad de registros que desea modificar.");
+  fgets(line, sizeof(line), stdin);
+  cantidad = atoi(line);
+  for (i = 0; i < cantidad; i++){
+    printf("Ingrese el nombre, apellidos y nombre de la mascota del Cliente numero %d, separados por espacio. Ejemplo: Susana Torio Grande Albondiga \n", i);
+    fgets(line, sizeof(line), stdin);
+    sscanf(line, "%s %s %s %s", nombre, ap1, ap2, mascota);
+    int j = getCliente(clientes, size, nombre, ap1, ap2, mascota);
+    modificar(clientes, j);
+  }
+  return clientes;
+}
+//fgets cagandome la vida de nuevo
 void menu(){
+  int n;
+  char opcion[2];
+  int size, sizeN, agregar, eliminar, index;
   struct Cliente* clientes;
-  struct Cliente* clientes2;
-  //struct Cliente* clientesNuevo;
-  int size;
-  //int eliminar;
-  int sizeN;
-  int agregar;
   clientes = crearArreglo(&size);
-  clientes2 = agregarClientes(clientes, size, &agregar, &sizeN);
-  //clientesNuevo = eliminarClientes(clientes, clientes2, size, eliminar, &sizeN);
-  crearArchivo(clientes2, sizeN);
-  freeArreglo(clientes2);
+  struct Cliente* clientes2;
+  struct Cliente* clientesAborrar;
+  char nombre[21];
+  char mascota[21];
+  char ap1[31];
+  char ap2[31];
+  char line[MAXLINE];
+  char rutId[11];
+  printf("%s\n", "Bienvenido al programa de la veterinaria El Bulto Feliz. Con este programa podra agregar(0) o eliminar registros(1), asociar un rut(2) o un id(3) con un cliente o su mascota, y modificar registros existentes(4) . Que desea hacer? Favor abstenerse de ingresar algo no valido, ya que hara que el programa termine.");
+  fgets(opcion, sizeof(opcion), stdin);
+  n = atoi(opcion);
+  switch (n) {
+    case 0:
+      clientes2 = agregarClientes(clientes, size, &agregar, &sizeN);
+      crearArchivo(clientes2, sizeN);
+      freeArreglo(clientes2);
+      printf("%s\n", "Si todo ha salido bien, en la carpeta donde tiene el programa deberia haber un archivo llamado 'Bultos.out', que contenga los registros nuevos mas los originales.");
+      break;
+    case 1:
+      clientesAborrar = clientesAeliminar(&eliminar);
+      clientes2 = eliminarClientes(clientes, clientesAborrar, size, eliminar, &sizeN);
+      crearArchivo(clientes2, sizeN);
+      freeArreglo(clientes2);
+      printf("%s\n", "Si todo ha salido bien, en la carpeta donde tiene el programa deberia haber un archivo llamado 'Bultos.out', sin los clientes que ha querido eliminar.");
+      break;
+    case 2:
+      printf("%s\n", "Ingrese el nombre y apellidos del dueño y el nombre de la mascota separados por espacios. Ejemplo: Susana Torio Grande Albondiga");
+      fgets(line, sizeof(line), stdin);
+      sscanf(line, "%s %s %s %s", nombre, ap1, ap2, mascota);
+      index = getCliente(clientes, size, nombre, ap1, ap2, mascota);
+      printf("%s\n", "Ingrese el rut que desea agregar, con puntos y guion. Ejemplo: 11.111.111-1");
+      fgets(rutId, sizeof(rutId), stdin);
+      clientes2 = agregarRut(clientes, index, rutId);
+      crearArchivo(clientes2, size);
+      freeArreglo(clientes2);
+      printf("%s\n", "Si todo ha salido bien, en la carpeta donde tiene el programa deberia haber un archivo llamado 'Bultos.out', con el rut agregado al cliente mencionado");
+      break;
+    case 3:
+      printf("%s\n", "Ingrese el nombre y apellidos del dueño y el nombre de la mascota separados por espacios. Ejemplo: Susana Torio Grande Albondiga");
+      fgets(line, sizeof(line), stdin);
+      sscanf(line, "%s %s %s %s", nombre, ap1, ap2, mascota);
+      index = getCliente(clientes, size, nombre, ap1, ap2, mascota);
+      printf("%s\n", "Ingrese el ID que desea agregar. El ID tiene el mismo formato que un rut con puntos y guion. Ejemplo: 11.111.111-1");
+      fgets(rutId, sizeof(rutId), stdin);
+      clientes2 = agregarID(clientes, index, rutId);
+      crearArchivo(clientes2, size);
+      freeArreglo(clientes2);
+      printf("%s\n", "Si todo ha salido bien, en la carpeta donde tiene el programa deberia haber un archivo llamado 'Bultos.out', con el ID agregado a la mascota del cliente mencionado");
+      break;
+    case 4:
+      clientes2 = aModificar(clientes, size);
+      crearArchivo(clientes2, size);
+      freeArreglo(clientes2);
+      printf("%s\n", "Si todo ha salido bien, en la carpeta donde tiene el programa deberia haber un archivo llamado 'Bultos.out', con las modificaciones pertinentes a cada registro pedido.");
+      break;
+    default:
+      printf("%s\n", "Ha ingresado un valor no valido, el programa terminara.");
+      exit(0);
+  }
 }
 
 int main(int argc, char const *argv[]) {
