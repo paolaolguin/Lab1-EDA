@@ -17,8 +17,8 @@ struct Cliente{
   unsigned short int atentions;
   char vaccines[3];
   char date[11];
-  char run[11];
-  char id[11];
+  char run[13];
+  char id[13];
 };
 
 enum {OK, NULLPOINTER} stat;
@@ -173,9 +173,6 @@ struct Cliente* eliminarClientes(struct Cliente* clientes, struct Cliente* clien
     }
     freeArreglo(clientes);
     freeArreglo(clientesAborrar);
-    for( i = 0; i < (size - size2); i++){
-      printf("%s %s %s %s %s %hu %s %hu %s %s", clientesAborrar[i].name , clientesAborrar[i].sur1, clientesAborrar[i].sur2, clientesAborrar[i].pet, clientesAborrar[i].species, clientesAborrar[i].age, clientesAborrar[i].phone, clientesAborrar[i].atentions, clientesAborrar[i].vaccines, clientesAborrar[i].date);
-    }
     return clientesNuevo;
   }
 }
@@ -295,7 +292,7 @@ struct Cliente* aModificar(struct Cliente* clientes, int size){
 //fgets cagandome la vida de nuevo
 void menu(){
   int n;
-  char opcion[2];
+  char opcion[MAXLINE];
   int size, sizeN, agregar, eliminar, index;
   struct Cliente* clientes;
   clientes = crearArreglo(&size);
@@ -306,7 +303,7 @@ void menu(){
   char ap1[31];
   char ap2[31];
   char line[MAXLINE];
-  char rutId[11];
+  char rutId[13];
   printf("%s\n", "Bienvenido al programa de la veterinaria El Bulto Feliz. Con este programa podra agregar(0) o eliminar registros(1), asociar un rut(2) o un id(3) con un cliente o su mascota, y modificar registros existentes(4) . Que desea hacer? Favor abstenerse de ingresar algo no valido, ya que hara que el programa termine.");
   fgets(opcion, sizeof(opcion), stdin);
   n = atoi(opcion);
