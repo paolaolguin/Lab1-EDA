@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 
 struct Cliente{
@@ -14,8 +15,8 @@ struct Cliente{
   unsigned short int atentions;
   char vaccines[3];
   char date[11];
-  char run[13];
-  char id[13];
+  char run[14];
+  char id[14];
 };
 struct nodo{
 	struct nodo *siguiente;
@@ -58,7 +59,7 @@ short int agregarNodo(struct lista *centinela, struct nodo *node){
   struct nodo *temp = NULL;
   temp = centinela->inicial;
   while (temp->siguiente != NULL){
-    temp = temp->siguiente;
+    temp = temp->siguiente; 
   }
   temp->siguiente = node;
   centinela->final = node;
@@ -98,7 +99,7 @@ short int leerArchivo(struct lista *centinela){
 }
 /*Funcion que busca un nodo dada su posicion*/
 struct nodo *buscarNodo(struct lista *centinela, unsigned int posicion){
-  if (centinela == NULL || posicion <= centinela->cantidad){
+  if (centinela == NULL || posicion >= centinela->cantidad){
     return NULL;
   }
   int index;
@@ -134,6 +135,7 @@ short int removerNodo(struct lista *centinela, unsigned int posicion){
   if (posicion == centinela->cantidad -1){
     centinela->final = temp;
   }
+  centinela->cantidad--;
   free(exiliado);
   exiliado = NULL;
   return 1;
@@ -215,32 +217,45 @@ void modificar(struct lista *centinela, unsigned int posicion){
   char opcion[3];
   char fecha[11];
   char rutid[13];
+  int index = 0;
+
   temp = buscarNodo(centinela, posicion);
+
   short int menu = menuModificacion();
   switch (menu){
     case 0:
     printf("%s\n", "Ingrese el nombre corregido, recuerde que tiene un largo maximo de 20.");
     fgets(nombre, sizeof(nombre), stdin);
+    while(index  != 21 && nombre[index++] != '\n');
+    nombre[index - 1] = '\0';
     strcpy(temp->cliente.name, nombre);
     break;
   case 1:
     printf("%s\n", "Ingrese el apellido paterno corregido, recuerde que tiene un largo maximo de 30.");
     fgets(apellido, sizeof(apellido), stdin);
+    while(index  != 21 && apellido[index++] != '\n');
+    apellido[index - 1] = '\0';
     strcpy(temp->cliente.sur1, apellido);
     break;
   case 2:
     printf("%s\n", "Ingrese el apellido materno corregido, recuerde que tiene un largo maximo de 30.");
     fgets(apellido, sizeof(apellido), stdin);
+    while(index  != 31 && apellido[index++] != '\n');
+    apellido[index - 1] = '\0';
     strcpy(temp->cliente.sur2, apellido);
     break;
   case 3:
     printf("%s\n", "Ingrese el nombre de la mascota corregido, recuerde que tiene un largo maximo de 20.");
     fgets(nombre, sizeof(nombre), stdin);
+    while(index  != 31 && nombre[index++] != '\n');
+    nombre[index - 1] = '\0';
     strcpy(temp->cliente.pet, nombre);
     break;
   case 4:
     printf("%s\n", "Ingrese la especie de la mascota corregida, recuerde que tiene un largo maximo de 20.");
     fgets(nombre, sizeof(nombre), stdin);
+    while(index  != 31 && nombre[index++] != '\n');
+    nombre[index - 1] = '\0';
     strcpy(temp->cliente.species, nombre);
     break;
   case 5:
@@ -251,26 +266,38 @@ void modificar(struct lista *centinela, unsigned int posicion){
   case 6:
     printf("%s\n", "Ingrese la correcion sobre si la mascota tiene sus vacunas al dia o no. Recuerde que el largo maximo de esto es 2 (si o no)");
     fgets(opcion, sizeof(opcion), stdin);
+    while(index  != 31 && opcion[index++] != '\n');
+    opcion[index - 1] = '\0';
     strcpy(temp->cliente.vaccines, opcion);
     break;
   case 7:
     printf("%s\n", "Ingrese el telefono de contacto del cliente corregido. Recuerde que tiene un largo maximo de 20.");
     fgets(nombre, sizeof(nombre), stdin);
+    while(index  != 21 && nombre[index++] != '\n');
+    nombre[index - 1] = '\0';
     strcpy(temp->cliente.phone, nombre);
     break;
   case 8:
     printf("%s\n", "Ingrese la proxima fecha de atencion corregida. Recuerde que esta en el formato DD/MM/YYYY y que, por lo mismo, su largo maximo es de 10.");
     fgets(fecha, sizeof(fecha), stdin);
+    while(index  != 11 && fecha[index++] != '\n');
+    fecha[index - 1] = '\0';
     strcpy(temp->cliente.date, fecha);
     break;
   case 9:
     printf("%s\n", "Ingrese el rut, con puntos y guiones. por ejemplo: 11.111.111-1");
     fgets(rutid, sizeof(rutid), stdin);
+    while(index  != 14 && rutid[index++] != '\n');
+    rutid[index - 1] = '\0';
     strcpy(temp->cliente.run, rutid);
+    break;
   case 10:
     printf("%s\n", "Ingrese el id, que tiene el mismo formato que un rut con puntos y guiones. por ejemplo: 11.111.111-1");
     fgets(rutid, sizeof(rutid), stdin);
+    while(index  != 14 && rutid[index++] != '\n');
+    rutid[index - 1] = '\0';
     strcpy(temp->cliente.run, rutid);
+    break;
   default:
     printf("%s\n", "Opcion no valida, el programa terminara.");
     exit(0);
@@ -278,20 +305,130 @@ void modificar(struct lista *centinela, unsigned int posicion){
 
 }
 /*Funcion que agrega un nuevo cliente a la lista*/
-void agregarCliente(struct lista *centinela){
+short int agregarCliente(struct lista *centinela){
+  short int result;
   char string[MAXLINE];
   printf("%s\n", "Ingrese el cliente de la misma forma que se encuentra en el archivo de entrada.");
   fgets(string, sizeof(string), stdin);
   struct nodo *nuevo = NULL;
   struct Cliente client = crearCliente(string);
   nuevo = nuevoNodo(client);
-  agregarNodo(centinela, nuevo);
+  result = agregarNodo(centinela, nuevo);
+  return result;
 }
-int main(int argc, char const *argv[]) {
+int *arregloPosiciones(struct lista *centinela, int* arr, int size){
+  char line[MAXLINE];
+  unsigned int i;
+  for (i = 0; i < size; i++){
+    printf("Ingrese el cliente numero %d con el mismo formato que se encuentra en el archivo de entrada.\n", i);
+    fgets(line, sizeof(line), stdin);
+    arr[i] = getCliente(line, centinela);
+  }
+  return arr;
+}
+
+void menu(){
+  char line[MAXLINE];
+  short int opcion;
+  short int control;
+  int *cant;
+  unsigned int size;
+  unsigned int index;
+  struct Cliente client;
+  struct nodo *node = NULL;
+  time_t inicio, fin, inicioA, finA, inicioM, finM, inicioE, finE;
+  inicio = time(NULL);
   struct lista *lista = crearLista();
   leerArchivo(lista);
-  crearArchivo(lista);
-  freeLista(lista);
+  fin = time(NULL);
+  printf("Tiempo en crear la lista = %f\n\n", difftime(fin, inicio));
+  printf("%s\n", "Bienvenido al programa de listas de la Veterinaria El Bulto Feliz. Con este programa puede modificar registros (0), agregarlos (1) o eliminarlos (2). Que desea hacer? Para cada vez que se le de una opcion, si ingresa un valor no valido, el programa terminara.");
+  fgets(line, sizeof(line), stdin);
+  opcion = atoi(line);
+  switch (opcion) {
+    case 0:
+      printf("%s\n", "Ha decidido modificar registros existentes. Desde aqui puede cambiar cualquier valor que el cliente tenga, ademas de poder agregar rut o id. Cuantos datos desea modificar?");
+      fgets(line, sizeof(line), stdin);
+      inicioM = time(NULL);
+      size = atoi(line);
+      cant = (int*)calloc(size, sizeof(int));
 
+      cant = arregloPosiciones(lista, cant, size);
+
+      for (index = 0; index < size; index++){
+        if (cant[index] == -1){
+          printf("El indice de este cliente no es valido. Esto significa que el cliente no esta en la lista, por lo que no se podra modificar.\n");
+          continue;
+        }
+        printf("Para el cliente numero %d: \n", index);
+        modificar(lista, cant[index]);
+      }
+      free(cant);
+      cant = NULL;
+      crearArchivo(lista);
+      finM = time(NULL);
+      printf("Tiempo en crear solucion tras modificar %f\n", difftime(finM, inicioM));
+      freeLista(lista);
+      printf("%s\n", "Si todo salio como debe, en la carpeta donde se encuentra este programa habra un archivo llamado Bultos.out con las modificaciones pertinentes.");
+      break;
+    case 1:
+      printf("%s\n", "Ha decidido agregar nuevos registros a los existentes. Desde aqui puede agregar un cliente, con el formato que se encuentra en el archivo de entrada. Cuantos datos desea agregar?");
+      fgets(line, sizeof(line), stdin);
+      inicioA = time(NULL);
+      size = atoi(line);
+      for (index = 0; index < size; index++){
+        fgets(line, sizeof(line), stdin);
+        client = crearCliente(line);
+        node = nuevoNodo(client);
+        control = agregarNodo(lista, node);
+        if (control == -1){
+          printf("%s\n", "Paso algo y no se pudo agregar el cliente.");
+          continue;
+        }
+      }
+      crearArchivo(lista);
+      finA = time(NULL);
+      printf("Tiempo en crear solucion tras agregar %f\n", difftime(finA, inicioA));
+      freeLista(lista);
+      printf("%s\n", "Si todo salio como debe, en la carpeta donde se encuentra este programa habra un archivo llamado Bultos.out con las modificaciones pertinentes.");
+      break;
+    case 2:
+      printf("%s\n", "Ha decidido eliminar registros. Cuantos datos desea borrar?");
+      inicioE = time(NULL);
+      fgets(line, sizeof(line), stdin);
+      size = atoi(line);
+      if (size >= lista->cantidad){
+        printf("%s\n", "No se pueden eliminar mas clientes que los que se tienen. El programa terminara");
+        exit(0);
+      }
+      cant = (int*)calloc(size, sizeof(int));
+      cant = arregloPosiciones(lista, cant, size);
+      for (index = 0; index < size; index++){
+        control = removerNodo(lista, cant[index]);
+        if (control == -1){
+          printf("%s\n", "Hubo un error y no se pudo eliminar ese cliente.");
+          continue;
+        }
+      }
+      free(cant);
+      cant = NULL;
+      finE = time(NULL);
+      printf("Tiempo en crear solucion eliminando = %f\n", difftime(finE, inicioE));
+      crearArchivo(lista);
+      freeLista(lista);
+      printf("%s\n", "Si todo salio como debe, en la carpeta donde se encuentra este programa habra un archivo llamado Bultos.out con las modificaciones pertinentes.");
+      break;
+    default:
+        printf("%s\n", "El valor ingresado no es valido. Se terminara el programa");
+        exit(0);
+
+  }
+
+}
+
+int main(int argc, char const *argv[]) {
+  printf("\n\n%s\n\n", "****************COMIENZO PROGRAMA****************");
+  menu();
+  printf("\n\n%s\n\n", "****************TERMINO PROGRAMA****************");
   return 0;
 }
